@@ -1,6 +1,8 @@
 Terraform Keycloak Provider
 ===========================
 
+[![Build Status](https://travis-ci.org/tazjin/terraform-provider-keycloak.svg?branch=master)](https://travis-ci.org/tazjin/terraform-provider-keycloak)
+
 This project implements a [Terraform provider][] for declaratively configuring
 API resources in [Keycloak][].
 
