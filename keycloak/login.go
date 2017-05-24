@@ -22,7 +22,7 @@ const (
 )
 
 // Attempt to login to Keycloak with the provided information.
-func Login(id string, secret string, baseUrl string, realm string) (*Client, error) {
+func Login(id string, secret string, baseUrl string, realm string) (*KeycloakClient, error) {
 	url := fmt.Sprintf(tokenEndpoint, baseUrl, realm)
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(loginBody))
@@ -47,9 +47,10 @@ func Login(id string, secret string, baseUrl string, realm string) (*Client, err
 		return nil, err
 	}
 
-	client := &Client{
+	client := &KeycloakClient{
 		token: t.AccessToken,
 		url:   baseUrl,
+		realm: realm,
 	}
 	return client, nil
 }
