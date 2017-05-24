@@ -29,6 +29,7 @@ const (
 	clientUri       = "%s/auth/admin/realms/%s/clients/%s"
 	clientList      = "%s/auth/admin/realms/%s/clients"
 	clientSecretUri = "%s/auth/admin/realms/%s/clients/%s/client-secret"
+	clientUserUri   = "%s/auth/admin/realms/%s/clients/%s/service-account-user"
 )
 
 func (c *KeycloakClient) GetClient(id string) (*Client, error) {
@@ -94,4 +95,17 @@ func (c *KeycloakClient) UpdateClient(client *Client) (*Client, error) {
 func (c *KeycloakClient) DeleteClient(id string) error {
 	url := fmt.Sprintf(clientUri, c.url, c.realm, id)
 	return c.delete(url)
+}
+
+func (c *KeycloakClient) GetClientServiceAccountUser(id string) (*User, error) {
+	url := fmt.Sprintf(clientUserUri, c.url, c.realm, id)
+
+	var user User
+	err := c.get(url, &user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
