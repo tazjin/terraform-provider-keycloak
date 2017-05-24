@@ -47,5 +47,6 @@ provider "keycloak" {
   realm = "my-company"  # defaults to 'master'
 }
 ```
-
+[Terraform provider]: https://www.terraform.io/docs/plugins/provider.html
+[Keycloak]: http://www.keycloak.org/
 [configure]: https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin
