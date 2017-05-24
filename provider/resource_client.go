@@ -16,6 +16,9 @@ func resourceClient() *schema.Resource {
 		Update: schema.UpdateFunc(resourceClientUpdate),
 		Delete: schema.DeleteFunc(resourceClientDelete),
 
+		// Keycloak clients are importable by ID, so no import logic is required!
+		Importer: &schema.ResourceImporter{},
+
 		Schema: map[string]*schema.Schema{
 			"client_id": {
 				Type:     schema.TypeString,
