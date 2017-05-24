@@ -12,7 +12,6 @@ import (
 type KeycloakClient struct {
 	token string
 	url   string
-	realm string
 }
 
 // A function that mimics the default HTTP client 'Do' but authenticates all requests.
