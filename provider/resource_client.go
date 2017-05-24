@@ -65,6 +65,10 @@ func resourceClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"service_account_user_id": {
+				Type: schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -85,6 +89,16 @@ func resourceClientRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.Set("client_secret", secret.Value)
+
+	// Look up service account user ID (if enabled)
+	if client.ServiceAccountsEnabled {
+		user, err := c.GetClientServiceAccountUser(d.Id())
+		if err != nil {
+			return err
+		}
+
+		d.Set("service_account_user_id", user.Id)
+	}
 
 	return nil
 }
