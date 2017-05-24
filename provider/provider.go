@@ -2,14 +2,17 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
 	"github.com/tazjin/terraform-provider-keycloak/keycloak"
 )
 
-func Provider() *schema.Provider {
+func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema:        keycloakProviderSchema(),
 		ConfigureFunc: schema.ConfigureFunc(keycloakProviderSetup),
-		ResourcesMap:  map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"keycloak_client": resourceClient(),
+		},
 	}
 }
 
@@ -33,9 +36,9 @@ func keycloakProviderSchema() map[string]*schema.Schema {
 			DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_API_BASE", nil),
 		},
 		"realm": {
-			Required:    false,
+			Optional:    true,
 			Type:        schema.TypeString,
-			DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_REALM", "master"), // TODO: Spelling?
+			DefaultFunc: schema.EnvDefaultFunc("KEYCLOAK_REALM", "master"),
 		},
 	}
 }
