@@ -59,19 +59,33 @@ func resourceClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+
+			// Computed fields (i.e. things looked up in Keycloak after client creation)
+			"client_secret": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func resourceClientRead(d *schema.ResourceData, m interface{}) error {
 	c := m.(*keycloak.KeycloakClient)
-	client, err := c.GetClient(d.Id())
 
+	client, err := c.GetClient(d.Id())
 	if err != nil {
 		return err
 	}
 
 	clientToResourceData(client, d)
+
+	// Look up client secret in addition
+	secret, err := c.GetClientSecret(d.Id())
+	if err != nil {
+		return err
+	}
+	d.Set("client_secret", secret.Value)
+
 	return nil
 }
 
