@@ -20,6 +20,11 @@ func resourceClient() *schema.Resource {
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
+			"realm": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "master",
+			},
 			"client_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -66,7 +71,7 @@ func resourceClient() *schema.Resource {
 				Computed: true,
 			},
 			"service_account_user_id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -76,7 +81,7 @@ func resourceClient() *schema.Resource {
 func resourceClientRead(d *schema.ResourceData, m interface{}) error {
 	c := m.(*keycloak.KeycloakClient)
 
-	client, err := c.GetClient(d.Id())
+	client, err := c.GetClient(d.Id(), realm(d))
 	if err != nil {
 		return err
 	}
@@ -84,7 +89,7 @@ func resourceClientRead(d *schema.ResourceData, m interface{}) error {
 	clientToResourceData(client, d)
 
 	// Look up client secret in addition
-	secret, err := c.GetClientSecret(d.Id())
+	secret, err := c.GetClientSecret(d.Id(), realm(d))
 	if err != nil {
 		return err
 	}
@@ -92,7 +97,7 @@ func resourceClientRead(d *schema.ResourceData, m interface{}) error {
 
 	// Look up service account user ID (if enabled)
 	if client.ServiceAccountsEnabled {
-		user, err := c.GetClientServiceAccountUser(d.Id())
+		user, err := c.GetClientServiceAccountUser(d.Id(), realm(d))
 		if err != nil {
 			return err
 		}
@@ -106,7 +111,7 @@ func resourceClientRead(d *schema.ResourceData, m interface{}) error {
 func resourceClientCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*keycloak.KeycloakClient)
 	client := resourceDataToClient(d)
-	created, err := apiClient.CreateClient(&client)
+	created, err := apiClient.CreateClient(&client, realm(d))
 
 	if err != nil {
 		return err
@@ -120,15 +125,12 @@ func resourceClientCreate(d *schema.ResourceData, m interface{}) error {
 func resourceClientUpdate(d *schema.ResourceData, m interface{}) error {
 	client := resourceDataToClient(d)
 	apiClient := m.(*keycloak.KeycloakClient)
-
-	_, err := apiClient.UpdateClient(&client)
-
-	return err
+	return apiClient.UpdateClient(&client, realm(d))
 }
 
 func resourceClientDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*keycloak.KeycloakClient)
-	return apiClient.DeleteClient(d.Id())
+	return apiClient.DeleteClient(d.Id(), realm(d))
 }
 
 func resourceDataToClient(d *schema.ResourceData) keycloak.Client {
