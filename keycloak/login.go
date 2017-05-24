@@ -50,7 +50,6 @@ func Login(id string, secret string, baseUrl string, realm string) (*KeycloakCli
 	client := &KeycloakClient{
 		token: t.AccessToken,
 		url:   baseUrl,
-		realm: realm,
 	}
 	return client, nil
 }

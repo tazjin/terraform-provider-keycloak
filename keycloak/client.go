@@ -32,8 +32,8 @@ const (
 	clientUserUri   = "%s/auth/admin/realms/%s/clients/%s/service-account-user"
 )
 
-func (c *KeycloakClient) GetClient(id string) (*Client, error) {
-	url := fmt.Sprintf(clientUri, c.url, c.realm, id)
+func (c *KeycloakClient) GetClient(id string, realm string) (*Client, error) {
+	url := fmt.Sprintf(clientUri, c.url, realm, id)
 
 	var client Client
 	err := c.get(url, &client)
@@ -45,8 +45,8 @@ func (c *KeycloakClient) GetClient(id string) (*Client, error) {
 	return &client, nil
 }
 
-func (c *KeycloakClient) GetClientSecret(id string) (*ClientSecret, error) {
-	url := fmt.Sprintf(clientSecretUri, c.url, c.realm, id)
+func (c *KeycloakClient) GetClientSecret(id string, realm string) (*ClientSecret, error) {
+	url := fmt.Sprintf(clientSecretUri, c.url, realm, id)
 
 	var secret ClientSecret
 	err := c.get(url, &secret)
@@ -59,8 +59,8 @@ func (c *KeycloakClient) GetClientSecret(id string) (*ClientSecret, error) {
 }
 
 // Attempt to create a Keycloak client and return the created client.
-func (c *KeycloakClient) CreateClient(client *Client) (*Client, error) {
-	url := fmt.Sprintf(clientList, c.url, c.realm)
+func (c *KeycloakClient) CreateClient(client *Client, realm string) (*Client, error) {
+	url := fmt.Sprintf(clientList, c.url, realm)
 	clientLocation, err := c.post(url, *client)
 	if err != nil {
 		return nil, err
@@ -76,29 +76,24 @@ func (c *KeycloakClient) CreateClient(client *Client) (*Client, error) {
 	return &createdClient, nil
 }
 
-func (c *KeycloakClient) UpdateClient(client *Client) (*Client, error) {
-	url := fmt.Sprintf(clientUri, c.url, c.realm, client.Id)
+func (c *KeycloakClient) UpdateClient(client *Client, realm string) error {
+	url := fmt.Sprintf(clientUri, c.url, realm, client.Id)
 	err := c.put(url, *client)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	updated, err := c.GetClient(client.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	return updated, nil
+	return nil
 }
 
-func (c *KeycloakClient) DeleteClient(id string) error {
-	url := fmt.Sprintf(clientUri, c.url, c.realm, id)
+func (c *KeycloakClient) DeleteClient(id string, realm string) error {
+	url := fmt.Sprintf(clientUri, c.url, realm, id)
 	return c.delete(url)
 }
 
-func (c *KeycloakClient) GetClientServiceAccountUser(id string) (*User, error) {
-	url := fmt.Sprintf(clientUserUri, c.url, c.realm, id)
+func (c *KeycloakClient) GetClientServiceAccountUser(id string, realm string) (*User, error) {
+	url := fmt.Sprintf(clientUserUri, c.url, realm, id)
 
 	var user User
 	err := c.get(url, &user)
