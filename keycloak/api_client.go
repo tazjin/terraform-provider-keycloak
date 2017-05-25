@@ -54,13 +54,11 @@ func (c *KeycloakClient) post(url string, v interface{}) (string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.do(req)
 
-	fmt.Println(string(reqBody))
-
 	if err != nil {
 		return "", err
 	}
 
-	if resp.StatusCode != 201 {
+	if resp.StatusCode != 201 && resp.StatusCode != 204 {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 		return "", fmt.Errorf("Could not create resource: %s (%d)", string(body), resp.StatusCode)
