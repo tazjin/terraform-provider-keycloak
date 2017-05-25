@@ -86,8 +86,16 @@ func (c *KeycloakClient) put(url string, v interface{}) error {
 	return nil
 }
 
-func (c *KeycloakClient) delete(url string) error {
-	req, _ := http.NewRequest("DELETE", url, nil)
+func (c *KeycloakClient) delete(url string, body interface{}) error {
+	var req *http.Request
+	if body != nil {
+		bodyJson, _ := json.Marshal(body)
+		req, _ = http.NewRequest("DELETE", url, bytes.NewBuffer(bodyJson))
+		req.Header.Set("Content-Type", "application/json")
+	} else {
+		req, _ = http.NewRequest("DELETE", url, nil)
+	}
+
 	resp, err := c.do(req)
 
 	if err != nil {
