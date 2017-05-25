@@ -8,8 +8,9 @@ API resources in [Keycloak][].
 
 ## Status
 
-This provider can currently manage Keycloak `client` resources. Not all fields of
-this resource are supported at the moment.
+This provider can currently manage Keycloak `client` resources and user-role mappings.
+
+Not all fields of those resources are supported at the moment.
 
 ## Installation
 
