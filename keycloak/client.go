@@ -89,7 +89,7 @@ func (c *KeycloakClient) UpdateClient(client *Client, realm string) error {
 
 func (c *KeycloakClient) DeleteClient(id string, realm string) error {
 	url := fmt.Sprintf(clientUri, c.url, realm, id)
-	return c.delete(url)
+	return c.delete(url, nil)
 }
 
 func (c *KeycloakClient) GetClientServiceAccountUser(id string, realm string) (*User, error) {

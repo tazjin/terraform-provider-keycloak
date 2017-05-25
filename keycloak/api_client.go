@@ -54,13 +54,11 @@ func (c *KeycloakClient) post(url string, v interface{}) (string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.do(req)
 
-	fmt.Println(string(reqBody))
-
 	if err != nil {
 		return "", err
 	}
 
-	if resp.StatusCode != 201 {
+	if resp.StatusCode != 201 && resp.StatusCode != 204 {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 		return "", fmt.Errorf("Could not create resource: %s (%d)", string(body), resp.StatusCode)
@@ -88,8 +86,16 @@ func (c *KeycloakClient) put(url string, v interface{}) error {
 	return nil
 }
 
-func (c *KeycloakClient) delete(url string) error {
-	req, _ := http.NewRequest("DELETE", url, nil)
+func (c *KeycloakClient) delete(url string, body interface{}) error {
+	var req *http.Request
+	if body != nil {
+		bodyJson, _ := json.Marshal(body)
+		req, _ = http.NewRequest("DELETE", url, bytes.NewBuffer(bodyJson))
+		req.Header.Set("Content-Type", "application/json")
+	} else {
+		req, _ = http.NewRequest("DELETE", url, nil)
+	}
+
 	resp, err := c.do(req)
 
 	if err != nil {
