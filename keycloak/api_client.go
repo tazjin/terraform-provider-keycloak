@@ -50,7 +50,12 @@ func (c *KeycloakClient) get(url string, v interface{}) error {
 // Attempts to POST (create) a resource to Keycloak and returns the resource location.
 func (c *KeycloakClient) post(url string, v interface{}) (string, error) {
 	reqBody, _ := json.Marshal(v)
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+
+	if err != nil {
+		return "", err
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.do(req)
 
