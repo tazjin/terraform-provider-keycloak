@@ -34,19 +34,7 @@ func resourceRealm() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "external",
-				ValidateFunc: func(v interface{}, _ string) (w []string, err []error) {
-					switch v.(string) {
-					case
-						"all",
-						"external",
-						"none":
-						return
-					}
-					err = []error{
-						fmt.Errorf("Invalid value for ssl_required. Valid are ALL, EXTERNAL or NONE"),
-					}
-					return
-				},
+				ValidateFunc: validateSslRequired,
 			},
 			"display_name": {
 				Type:     schema.TypeString,
@@ -102,61 +90,89 @@ func resourceRealm() *schema.Resource {
 			"access_token_lifespan": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  300,
 			},
 			"access_token_lifespan_for_implicit_flow": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  900,
 			},
 			"sso_session_idle_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  1800,
 			},
 			"sso_session_max_lifespan": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  36000,
 			},
 			"offline_session_idle_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  2592000,
 			},
 			"access_code_lifespan": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  60,
 			},
 			"access_code_lifespan_user_action": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  300,
 			},
 			"access_code_lifespan_login": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  1800,
 			},
 			"max_failure_wait_seconds": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  900,
 			},
 			"minimum_quick_login_wait_seconds": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  60,
 			},
 			"wait_increment_seconds": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  60,
 			},
 			"quick_login_check_milli_seconds": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  1000,
 			},
 			"max_delta_time_seconds": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  43200,
 			},
 			"failure_factor": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  30,
 			},
 		},
 	}
+}
+
+func validateSslRequired(v interface{}, _ string) (w []string, err []error) {
+	switch v.(string) {
+	case
+		"all",
+		"external",
+		"none":
+		return
+	}
+	err = []error{
+		fmt.Errorf("Invalid value for ssl_required. Valid are ALL, EXTERNAL or NONE"),
+	}
+	return
 }
 
 func resourceRealmRead(d *schema.ResourceData, m interface{}) error {
