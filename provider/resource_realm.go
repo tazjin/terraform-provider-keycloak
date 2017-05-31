@@ -33,13 +33,13 @@ func resourceRealm() *schema.Resource {
 			"ssl_required": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "EXTERNAL",
+				Default:  "external",
 				ValidateFunc: func(v interface{}, _ string) (w []string, err []error) {
 					switch v.(string) {
 					case
-						"ALL",
-						"EXTERNAL",
-						"NONE":
+						"all",
+						"external",
+						"none":
 						return
 					}
 					err = []error{
@@ -235,6 +235,8 @@ func resourceDataToRealm(d *schema.ResourceData) *keycloak.Realm {
 
 	if !d.IsNewResource() {
 		r.Id = d.Id()
+	} else {
+		r.Id = r.Realm
 	}
 
 	if smtpMap, present := d.GetOk("smtp_server"); present {
