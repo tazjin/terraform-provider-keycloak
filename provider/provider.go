@@ -13,6 +13,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_client":            resourceClient(),
 			"keycloak_user_role_mapping": resourceUserRoleMapping(),
+			"keycloak_realm":             resourceRealm(),
 		},
 	}
 }
