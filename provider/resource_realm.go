@@ -45,9 +45,11 @@ func resourceRealm() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			// Due to Terraform being unable to deal with list default values this field *must* be set.
+			// The default values from Keycloak are: ["offline_access", "uma_authorization"]
 			"default_roles": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"smtp_server": {
