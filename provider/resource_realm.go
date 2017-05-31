@@ -31,9 +31,9 @@ func resourceRealm() *schema.Resource {
 			},
 
 			"ssl_required": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "external",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "external",
 				ValidateFunc: validateSslRequired,
 			},
 			"display_name": {
@@ -53,8 +53,8 @@ func resourceRealm() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"smtp_server": {
-				Type:     schema.TypeMap,
-				Optional: true,
+				Type:             schema.TypeMap,
+				Optional:         true,
 				DiffSuppressFunc: ignoreSmtpPasswordChange,
 			},
 
