@@ -69,11 +69,7 @@ func (c *KeycloakClient) CreateClient(client *Client, realm string) (*Client, er
 	var createdClient Client
 	err = c.get(clientLocation, &createdClient)
 
-	if err != nil {
-		return nil, err
-	}
-
-	return &createdClient, nil
+	return &createdClient, err
 }
 
 func (c *KeycloakClient) UpdateClient(client *Client, realm string) error {

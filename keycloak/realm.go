@@ -3,7 +3,7 @@ package keycloak
 import "fmt"
 
 // The available keys of the SMTP server map are not documented in Keycloak's API docs.
-type SmtpServer map[string]string
+type SmtpServer map[string]interface{}
 
 // Representation of top-level realm keys. According to the Keycloak documentation other keys than top-level keys will
 // be ignored on realm updates, which is why they are not included here.
@@ -15,19 +15,20 @@ type Realm struct {
 	Enabled bool   `json:"enabled"`
 
 	// Optional realm settings
-	SslRequired                 string      `json:"sslRequired,omitempty"` // valid values are ALL, NONE or EXTERNAL
-	DisplayName                 string      `json:"displayName,omitempty"`
-	InternationalizationEnabled *bool       `json:"internationalizationEnabled,omitempty"`
-	SupportedLocales            []string    `json:"supportedLocales,omitempty"`
-	SmtpServer                  *SmtpServer `json:"smtpServer,omitempty"`
-	RegistrationAllowed         *bool       `json:"registrationAllowed,omitempty"`
-	RegistrationEmailAsUsername *bool       `json:"registrationEmailAsUsername,omitempty"`
-	RememberMe                  *bool       `json:"rememberMe,omitempty"`
-	VerifyEmail                 *bool       `json:"verifyEmail,omitempty"`
-	ResetPasswordAllowed        *bool       `json:"resetPasswordAllowed,omitempty"`
-	EditUsernameAllowed         *bool       `json:"editUsernameAllowed,omitempty"`
-	BruteForceProtected         *bool       `json:"bruteForceProtected,omitempty"`
-	DefaultRoles                []string    `json:"defaultRoles,omitempty"`
+	SslRequired      string      `json:"sslRequired,omitempty"` // valid values are ALL, NONE or EXTERNAL
+	DisplayName      string      `json:"displayName,omitempty"`
+	SupportedLocales []string    `json:"supportedLocales,omitempty"`
+	DefaultRoles     []string    `json:"defaultRoles,omitempty"`
+	SmtpServer       *SmtpServer `json:"smtpServer,omitempty"`
+
+	InternationalizationEnabled *bool `json:"internationalizationEnabled,omitempty"`
+	RegistrationAllowed         *bool `json:"registrationAllowed,omitempty"`
+	RegistrationEmailAsUsername *bool `json:"registrationEmailAsUsername,omitempty"`
+	RememberMe                  *bool `json:"rememberMe,omitempty"`
+	VerifyEmail                 *bool `json:"verifyEmail,omitempty"`
+	ResetPasswordAllowed        *bool `json:"resetPasswordAllowed,omitempty"`
+	EditUsernameAllowed         *bool `json:"editUsernameAllowed,omitempty"`
+	BruteForceProtected         *bool `json:"bruteForceProtected,omitempty"`
 
 	// Token & session settings
 	AccessTokenLifespan                *int `json:"accessTokenLifespan,omitempty"`
@@ -61,10 +62,18 @@ func (c *KeycloakClient) GetRealm(id string) (*Realm, error) {
 }
 
 // This "imports" (i.e. creates) a realm from a realm representation.
-func (c *KeycloakClient) ImportRealm(r *Realm) error {
+func (c *KeycloakClient) CreateRealm(r *Realm) (*Realm, error) {
 	url := fmt.Sprintf(realmsUri, c.url)
-	_, err := c.post(url, *r)
-	return err
+
+	realmLocation, err := c.post(url, *r)
+	if err != nil {
+		return nil, err
+	}
+
+	var createdRealm Realm
+	err = c.get(realmLocation, &createdRealm)
+
+	return &createdRealm, err
 }
 
 func (c *KeycloakClient) UpdateRealm(r *Realm) error {
