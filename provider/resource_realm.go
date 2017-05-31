@@ -55,6 +55,7 @@ func resourceRealm() *schema.Resource {
 			"smtp_server": {
 				Type:     schema.TypeMap,
 				Optional: true,
+				DiffSuppressFunc: ignoreSmtpPasswordChange,
 			},
 
 			"internationalization_enabled": {
@@ -163,6 +164,19 @@ func resourceRealm() *schema.Resource {
 	}
 }
 
+// Keycloak returns some asterisks instead of the plaintext password when querying for the realm configuration.
+// Due to this Terraform will assume a change has happened and attempt to reset the password.
+// This function will ignore the planned change in such a case, but it will also currently make it impossible to
+// change the password (because it's not persisted in the state).
+func ignoreSmtpPasswordChange(k, old, new string, d *schema.ResourceData) bool {
+	if k == "smtp_server.password" && old == "**********" {
+		// It would be nice to print a warning here, but it's unclear how/if providers can output things.
+		return true
+	}
+
+	return false
+}
+
 func validateSslRequired(v interface{}, _ string) (w []string, err []error) {
 	switch v.(string) {
 	case
@@ -258,7 +272,7 @@ func resourceDataToRealm(d *schema.ResourceData) *keycloak.Realm {
 	}
 
 	if smtpMap, present := d.GetOk("smtp_server"); present {
-		smtp := smtpMap.(keycloak.SmtpServer)
+		smtp := keycloak.SmtpServer(smtpMap.(map[string]interface{}))
 		r.SmtpServer = &smtp
 	}
 
