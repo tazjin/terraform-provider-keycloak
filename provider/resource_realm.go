@@ -2,8 +2,11 @@ package provider
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/tazjin/terraform-provider-keycloak/keycloak"
+	"sort"
+	"io/ioutil"
 )
 
 func resourceRealm() *schema.Resource {
@@ -53,11 +56,11 @@ func resourceRealm() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"smtp_server": {
-				Type:             schema.TypeMap,
-				Optional:         true,
-				DiffSuppressFunc: ignoreSmtpPasswordChange,
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     smtpMapSchema(),
+				Set:      schema.SchemaSetFunc(smtpSettingSetHash),
 			},
-
 			"internationalization_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -164,17 +167,65 @@ func resourceRealm() *schema.Resource {
 	}
 }
 
-// Keycloak returns some asterisks instead of the plaintext password when querying for the realm configuration.
-// Due to this Terraform will assume a change has happened and attempt to reset the password.
-// This function will ignore the planned change in such a case, but it will also currently make it impossible to
-// change the password (because it's not persisted in the state).
-func ignoreSmtpPasswordChange(k, old, new string, d *schema.ResourceData) bool {
-	if k == "smtp_server.password" && old == "**********" {
-		// It would be nice to print a warning here, but it's unclear how/if providers can output things.
-		return true
+func smtpMapSchema() *schema.Resource {
+	return &schema.Resource{
+		// Every type in the map schema is 'string' because this is sent to the server as a Map<String, String>
+		// and parsed there as a Java property object.
+		Schema: map[string]*schema.Schema{
+			"host": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"port": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"starttls": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"auth": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"user": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"password": {
+				Type: schema.TypeString,
+				Sensitive: true,
+				Optional: true,
+				DiffSuppressFunc: func(_, old, _ string, d *schema.ResourceData) bool {
+					if old == "**********" {
+						return true
+					}
+					return false
+				},
+			},
+			"from": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"fromDisplayName": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+			},
+			"replyTo": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"replyToDisplayName": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"envelopeFrom": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
 	}
-
-	return false
 }
 
 func validateSslRequired(v interface{}, _ string) (w []string, err []error) {
@@ -205,7 +256,10 @@ func resourceRealmRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceRealmCreate(d *schema.ResourceData, m interface{}) error {
 	c := m.(*keycloak.KeycloakClient)
-	r := resourceDataToRealm(d)
+	r, err := resourceDataToRealm(d)
+	if err != nil {
+		return err
+	}
 
 	created, err := c.CreateRealm(r)
 	if err != nil {
@@ -219,7 +273,10 @@ func resourceRealmCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceRealmUpdate(d *schema.ResourceData, m interface{}) error {
 	c := m.(*keycloak.KeycloakClient)
-	r := resourceDataToRealm(d)
+	r, err := resourceDataToRealm(d)
+	if err != nil {
+		return err
+	}
 	return c.UpdateRealm(r)
 }
 
@@ -230,7 +287,7 @@ func resourceRealmDelete(d *schema.ResourceData, m interface{}) error {
 
 // Type/struct conversion boilerplate (thanks, Go)
 
-func resourceDataToRealm(d *schema.ResourceData) *keycloak.Realm {
+func resourceDataToRealm(d *schema.ResourceData) (*keycloak.Realm, error) {
 	r := keycloak.Realm{
 		Realm:   d.Get("realm").(string),
 		Enabled: d.Get("enabled").(bool),
@@ -271,12 +328,16 @@ func resourceDataToRealm(d *schema.ResourceData) *keycloak.Realm {
 		r.Id = r.Realm
 	}
 
-	if smtpMap, present := d.GetOk("smtp_server"); present {
-		smtp := keycloak.SmtpServer(smtpMap.(map[string]interface{}))
-		r.SmtpServer = &smtp
+	if smtpSet, present := d.GetOk("smtp_server"); present {
+		settings, err := setToSmtpSettings(smtpSet.(*schema.Set))
+
+		if err != nil {
+			return &r, err
+		}
+		r.SmtpServer = settings
 	}
 
-	return &r
+	return &r, nil
 }
 
 func realmToResourceData(r *keycloak.Realm, d *schema.ResourceData) {
@@ -290,7 +351,7 @@ func realmToResourceData(r *keycloak.Realm, d *schema.ResourceData) {
 	d.Set("default_roles", r.DefaultRoles)
 
 	if r.SmtpServer != nil {
-		d.Set("smtp_server", *r.SmtpServer)
+		d.Set("smtp_server", smtpSettingsToSet(r.SmtpServer))
 	}
 
 	setOptionalBool(d, "internationalization_enabled", r.InternationalizationEnabled)
@@ -316,4 +377,50 @@ func realmToResourceData(r *keycloak.Realm, d *schema.ResourceData) {
 	setOptionalInt(d, "quick_login_check_milli_seconds", r.QuickLoginCheckMilliSeconds)
 	setOptionalInt(d, "max_delta_time_seconds", r.MaxDeltaTimeSeconds)
 	setOptionalInt(d, "failure_factor", r.FailureFactor)
+}
+
+func setToSmtpSettings(set *schema.Set) (*map[string]interface{}, error) {
+	settings := set.List()
+
+	if len(settings) == 0 {
+		return nil, nil
+	}
+
+	if len(settings) > 1 {
+		return nil, fmt.Errorf("Only one SMTP server can be defined per realm")
+	}
+
+	smtpServer := settings[0].(map[string]interface{})
+
+	return &smtpServer, nil
+}
+
+func smtpSettingsToSet(settings *map[string]interface{}) *schema.Set {
+	return schema.NewSet(schema.HashResource(smtpMapSchema()), []interface{}{*settings})
+}
+
+// Perform a consistent hash of an smtp setting set (keys are normally unordered, causing
+// differences in hashes).
+func smtpSettingSetHash(v interface{}) int {
+	ioutil.WriteFile("/tmp/debug", []byte(fmt.Sprint("thing: ", v)), 0666)
+	settingSet := v.(*schema.Set)
+	// Can't do anything with the error here v0v
+	settings, _ := setToSmtpSettings(settingSet)
+
+	keys := make([]string, len(*settings))
+
+	i := 0
+	for key, _ := range *settings {
+		keys[i] = key
+		i++
+	}
+
+	sort.Strings(keys)
+
+	var hashInput string
+	for _, key := range keys {
+		hashInput += fmt.Sprint(key, ":", (*settings)[key])
+	}
+
+	return hashcode.String(hashInput)
 }

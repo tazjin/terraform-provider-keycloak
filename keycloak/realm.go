@@ -2,9 +2,6 @@ package keycloak
 
 import "fmt"
 
-// The available keys of the SMTP server map are not documented in Keycloak's API docs.
-type SmtpServer map[string]interface{}
-
 // Representation of top-level realm keys. According to the Keycloak documentation other keys than top-level keys will
 // be ignored on realm updates, which is why they are not included here.
 // http://www.keycloak.org/docs-api/3.1/rest-api/index.html#_realmrepresentation
@@ -19,7 +16,11 @@ type Realm struct {
 	DisplayName      string      `json:"displayName,omitempty"`
 	SupportedLocales []string    `json:"supportedLocales,omitempty"`
 	DefaultRoles     []string    `json:"defaultRoles,omitempty"`
-	SmtpServer       *SmtpServer `json:"smtpServer,omitempty"`
+
+	// The available keys of the SMTP server map are not documented in Keycloak's API docs, but they can be found in the
+	// source code at:
+	// https://github.com/keycloak/keycloak/blob/master/services/src/main/java/org/keycloak/email/DefaultEmailSenderProvider.java
+	SmtpServer       *map[string]interface{} `json:"smtpServer,omitempty"`
 
 	InternationalizationEnabled *bool `json:"internationalizationEnabled,omitempty"`
 	RegistrationAllowed         *bool `json:"registrationAllowed,omitempty"`
