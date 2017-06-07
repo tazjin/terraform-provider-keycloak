@@ -16,8 +16,10 @@ func resourceClient() *schema.Resource {
 		Update: schema.UpdateFunc(resourceClientUpdate),
 		Delete: schema.DeleteFunc(resourceClientDelete),
 
-		// Keycloak clients are importable by ID, so no import logic is required!
-		Importer: &schema.ResourceImporter{},
+		// Keycloak clients are importable by ID, but the realm must also be provided by the user.
+		Importer: &schema.ResourceImporter{
+			State: importClientHelper,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"realm": {
@@ -76,6 +78,20 @@ func resourceClient() *schema.Resource {
 			},
 		},
 	}
+}
+
+func importClientHelper(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	realm, id, err := splitRealmId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	d.SetId(id)
+	d.Set("realm", realm)
+
+	resourceClientRead(d, m)
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceClientRead(d *schema.ResourceData, m interface{}) error {

@@ -1,6 +1,10 @@
 package provider
 
-import "github.com/hashicorp/terraform/helper/schema"
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/schema"
+	"strings"
+)
 
 func realm(d *schema.ResourceData) string {
 	return d.Get("realm").(string)
@@ -47,4 +51,16 @@ func getStringSlice(d *schema.ResourceData, key string) []string {
 	}
 
 	return stringSlice
+}
+
+// This function is used when importing realm-specific resources. The realm must be specified by the user when
+// importing by using a `${realm}.${resource_id}` syntax.
+func splitRealmId(raw string) (string, string, error) {
+	split := strings.Split(raw, ".")
+
+	if len(split) != 2 {
+		return "", "", fmt.Errorf("Import ID must be specified as '${realm}.${resource_id}'")
+	}
+
+	return split[0], split[1], nil
 }
