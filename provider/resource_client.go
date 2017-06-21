@@ -66,7 +66,7 @@ func resourceClient() *schema.Resource {
 			},
 			"web_origins": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
@@ -146,8 +146,11 @@ func resourceDataToClient(d *schema.ResourceData) keycloak.Client {
 		redirectUris = append(redirectUris, uri.(string))
 	}
 
-	for _, origin := range d.Get("web_origins").([]interface{}) {
-		webOrigins = append(webOrigins, origin.(string))
+	rawOrigins, present := d.GetOk("web_origins")
+	if present {
+		for _, origin := range rawOrigins.([]interface{}) {
+			webOrigins = append(webOrigins, origin.(string))
+		}
 	}
 
 	c := keycloak.Client{
