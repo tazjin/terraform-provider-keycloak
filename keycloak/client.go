@@ -18,6 +18,7 @@ type Client struct {
 	PublicClient            bool     `json:"publicClient"`
 	BearerOnly              bool     `json:"bearerOnly"`
 	ServiceAccountsEnabled  bool     `json:"serviceAccountsEnabled"`
+	WebOrigins              []string `json:"webOrigins"`
 }
 
 type ClientSecret struct {
