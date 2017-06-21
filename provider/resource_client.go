@@ -64,6 +64,11 @@ func resourceClient() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"web_origins": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 
 			// Computed fields (i.e. things looked up in Keycloak after client creation)
 			"client_secret": {
@@ -135,9 +140,14 @@ func resourceClientDelete(d *schema.ResourceData, m interface{}) error {
 
 func resourceDataToClient(d *schema.ResourceData) keycloak.Client {
 	redirectUris := []string{}
+	webOrigins := []string{}
 
 	for _, uri := range d.Get("redirect_uris").([]interface{}) {
 		redirectUris = append(redirectUris, uri.(string))
+	}
+
+	for _, origin := range d.Get("web_origins").([]interface{}) {
+		webOrigins = append(webOrigins, origin.(string))
 	}
 
 	c := keycloak.Client{
@@ -149,6 +159,7 @@ func resourceDataToClient(d *schema.ResourceData) keycloak.Client {
 		PublicClient:            d.Get("public_client").(bool),
 		BearerOnly:              d.Get("bearer_only").(bool),
 		ServiceAccountsEnabled:  d.Get("service_accounts_enabled").(bool),
+		WebOrigins:              webOrigins,
 	}
 
 	if !d.IsNewResource() {
@@ -167,4 +178,5 @@ func clientToResourceData(c *keycloak.Client, d *schema.ResourceData) {
 	d.Set("public_client", c.PublicClient)
 	d.Set("bearer_only", c.BearerOnly)
 	d.Set("service_accounts_enabled", c.ServiceAccountsEnabled)
+	d.Set("web_origins", c.WebOrigins)
 }
