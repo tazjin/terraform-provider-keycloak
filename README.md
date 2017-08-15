@@ -14,18 +14,26 @@ Not all fields of those resources are supported at the moment.
 
 ## Installation
 
-Installation is simple:
+Grab a binary release for your operating system from the [releases][] page and drop it into
+`~/.terraform.d/plugins`.
+
+Run `terraform init` to initialise the new provider in the folder containing your configuration
+files and `terraform providers` to check that it has been loaded correctly.
+
+**Note**: The targeted version of Terraform is currently **v0.10.0**.
+
+## Building from source
+
+To guarantee that the binaries you are building are reproducible, you should consider using
+[Repeatr][] to perform source builds. Repeatr is used for version pinning (see the [formula][]).
+
+Repeatr will check out source code from Github, so in order to build your own forks this way
+you need to push your changes to a branch on Github.
+
+For "vanilla"-builds just do this:
 
 1. Install and configure Go
 2. `go get github.com/tazjin/terraform-provider-keycloak`
-
-You must also [configure][] the provider in Terraform. In your `~/.terraformrc` add
-
-```
-providers {
-  keycloak = "/path/to/gopath/bin/terraform-provider-keycloak"
-}
-```
 
 ## Setup instructions
 
@@ -51,3 +59,6 @@ provider "keycloak" {
 [Terraform provider]: https://www.terraform.io/docs/plugins/provider.html
 [Keycloak]: http://www.keycloak.org/
 [configure]: https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin
+[releases]: https://github.com/tazjin/terraform-provider-keycloak/releases
+[Repeatr]: http://repeatr.io/
+[formula]: terraform-provider-keycloak.frm
