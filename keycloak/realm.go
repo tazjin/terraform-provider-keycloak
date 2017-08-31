@@ -21,6 +21,11 @@ type Realm struct {
 	DefaultRoles     []string    `json:"defaultRoles,omitempty"`
 	SmtpServer       *SmtpServer `json:"smtpServer,omitempty"`
 
+	AccountTheme string `json:"accountTheme,omitempty"`
+	AdminTheme   string `json:"adminTheme,omitempty"`
+	EmailTheme   string `json:"emailTheme,omitempty"`
+	LoginTheme   string `json:"loginTheme,omitempty"`
+
 	InternationalizationEnabled *bool `json:"internationalizationEnabled,omitempty"`
 	RegistrationAllowed         *bool `json:"registrationAllowed,omitempty"`
 	RegistrationEmailAsUsername *bool `json:"registrationEmailAsUsername,omitempty"`

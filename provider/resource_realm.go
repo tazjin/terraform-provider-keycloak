@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/tazjin/terraform-provider-keycloak/keycloak"
 )
@@ -160,6 +161,22 @@ func resourceRealm() *schema.Resource {
 				Optional: true,
 				Default:  30,
 			},
+			"account_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"admin_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"email_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"login_theme": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -240,6 +257,11 @@ func resourceDataToRealm(d *schema.ResourceData) *keycloak.Realm {
 		SupportedLocales: getStringSlice(d, "supported_locales"),
 		DefaultRoles:     getStringSlice(d, "default_roles"),
 
+		AccountTheme: d.Get("account_theme").(string),
+		AdminTheme:   d.Get("admin_theme").(string),
+		EmailTheme:   d.Get("email_theme").(string),
+		LoginTheme:   d.Get("login_theme").(string),
+
 		InternationalizationEnabled: getOptionalBool(d, "internationalization_enabled"),
 		RegistrationAllowed:         getOptionalBool(d, "registration_allowed"),
 		RegistrationEmailAsUsername: getOptionalBool(d, "registration_email_as_username"),
@@ -288,6 +310,11 @@ func realmToResourceData(r *keycloak.Realm, d *schema.ResourceData) {
 	d.Set("display_name", r.DisplayName)
 	d.Set("supported_locales", r.SupportedLocales)
 	d.Set("default_roles", r.DefaultRoles)
+
+	d.Set("account_theme", r.AccountTheme)
+	d.Set("admin_theme", r.AdminTheme)
+	d.Set("email_theme", r.EmailTheme)
+	d.Set("login_theme", r.LoginTheme)
 
 	if r.SmtpServer != nil {
 		d.Set("smtp_server", *r.SmtpServer)
