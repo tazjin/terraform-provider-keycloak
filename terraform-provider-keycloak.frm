@@ -27,7 +27,7 @@ action:
       echo 'nameserver 8.8.8.8' > /etc/resolv.conf
       apt-get update && apt-get install -y git ca-certificates
       mkdir -p /go/src/github.com/tazjin
-      git clone --single-branch --branch master https://github.com/tazjin/terraform-provider-keycloak /go/src/github.com/tazjin/terraform-provider-keycloak
+      git clone --single-branch --branch release-v0.1-rc2 https://github.com/tazjin/terraform-provider-keycloak /go/src/github.com/tazjin/terraform-provider-keycloak
       cd /go/src/github.com/tazjin/terraform-provider-keycloak
       ./build-release.sh build
 outputs:

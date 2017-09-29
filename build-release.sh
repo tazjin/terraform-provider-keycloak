@@ -3,7 +3,7 @@ set -ueo pipefail
 
 readonly GIT_HASH="$(git rev-parse --short HEAD)"
 readonly LDFLAGS="-X main.gitHash=${GIT_HASH} -w -s"
-readonly VERSION="1.1.0-${GIT_HASH}"
+readonly VERSION="v0.1-rc2-${GIT_HASH}"
 readonly PROJECT='terraform-provider-keycloak'
 
 function build-for() {
