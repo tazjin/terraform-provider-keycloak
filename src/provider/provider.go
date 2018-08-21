@@ -1,9 +1,10 @@
 package provider
 
 import (
+	"keycloak"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/tazjin/terraform-provider-keycloak/keycloak"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -11,9 +12,12 @@ func Provider() terraform.ResourceProvider {
 		Schema:        keycloakProviderSchema(),
 		ConfigureFunc: schema.ConfigureFunc(keycloakProviderSetup),
 		ResourcesMap: map[string]*schema.Resource{
-			"keycloak_client":            resourceClient(),
-			"keycloak_user_role_mapping": resourceUserRoleMapping(),
-			"keycloak_realm":             resourceRealm(),
+			"keycloak_client":             resourceClient(),
+			"keycloak_user_role_mapping":  resourceUserRoleMapping(),
+			"keycloak_realm":              resourceRealm(),
+			"keycloak_user":               resourceUser(),
+			"keycloak_group":              resourceGroup(),
+			"keycloak_user_group_mapping": resourceUserGroupMapping(),
 		},
 	}
 }

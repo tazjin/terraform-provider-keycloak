@@ -33,7 +33,7 @@ you need to push your changes to a branch on Github.
 For "vanilla"-builds just do this:
 
 1. Install and configure Go
-2. `go get github.com/tazjin/terraform-provider-keycloak`
+2. `make install`
 
 ## Setup instructions
 
@@ -56,6 +56,46 @@ provider "keycloak" {
   realm = "my-company"  # defaults to 'master'
 }
 ```
+Note the following steps will need to be completed as part of the provider setup: 
+1. The client ("dingus" in above example) will have to be created under the chosen realm
+2. "Service Accounts Enabled" need to be enabled under client settings
+3. Under "Service Account Roles" the create-client, create-group, manage-clients, manage-groups, manage-users roles will need to be assigned under "realm-management
+
+Groups can be created using the keycloak_group resource:
+```
+resource "keycloak_group" "group1" {
+  name       = "<group_name>"
+  realm      = "<realm_name>"
+}
+
+```
+
+Users can be created using the keycloak_user resource:
+```
+resource "keycloak_user" "user1" {
+  realm      = "<realm_name>"
+  username   = "user1"
+  firstname  = "user"
+  lastname   = "cameron"
+  email      = "jcameron@abc.com"
+}
+```
+
+User group mapping can be created using the keycloak_user_group_mapping resource. You have to reference group and user ids as listed below. 
+```
+resource "keycloak_user_group_mapping" "group1_map" {
+  group_id = "${keycloak_group.group1.id}"
+  user_ids   = ["${keycloak_user.user1.id}", ]
+  realm      = "<realm_name>"
+}
+
+```
+To import a user or group use the following command:
+```
+terraform import <keycloak_resource>.<resource_name> <realm_name>.<resource_id>
+terraform import keycloak_group.group2 Jenkins.310f73af-3b70-4e4a-9a6f-a3f4de8c8f
+```
+
 [Terraform provider]: https://www.terraform.io/docs/plugins/provider.html
 [Keycloak]: http://www.keycloak.org/
 [configure]: https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin

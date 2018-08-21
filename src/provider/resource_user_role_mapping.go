@@ -1,8 +1,9 @@
 package provider
 
 import (
+	"keycloak"
+
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/tazjin/terraform-provider-keycloak/keycloak"
 )
 
 func resourceUserRoleMapping() *schema.Resource {

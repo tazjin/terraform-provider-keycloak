@@ -2,8 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
 	"strings"
+
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func realm(d *schema.ResourceData) string {
@@ -63,4 +64,37 @@ func splitRealmId(raw string) (string, string, error) {
 	}
 
 	return split[0], split[1], nil
+}
+
+func getMandatoryStringList(d *schema.ResourceData, key string) []string {
+	stringList := []string{}
+
+	for _, stringVal := range d.Get(key).([]interface{}) {
+		stringList = append(stringList, stringVal.(string))
+	}
+	return stringList
+}
+
+func getOptionalStringList(d *schema.ResourceData, key string) []string {
+	stringList := []string{}
+	rawList, present := d.GetOk(key)
+	if present {
+		for _, stringVal := range rawList.([]interface{}) {
+			stringList = append(stringList, stringVal.(string))
+		}
+	}
+	return stringList
+
+}
+
+func getOptionalStringMap(d *schema.ResourceData, key string) map[string]string {
+	stringMap := map[string]string{}
+	rawMap, present := d.GetOk(key)
+	if present {
+		for stringKey, stringVal := range rawMap.(map[string]interface{}) {
+			stringMap[stringKey] = stringVal.(string)
+		}
+	}
+	return stringMap
+
 }
