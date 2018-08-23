@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"log"
 )
 
 type UserGroupMap struct {
@@ -29,7 +28,6 @@ func (c *KeycloakClient) GetUsersInGroup(groupId string, realm string) (*UserGro
 	ug.GroupId = groupId
 	ug.Realm = realm
 	ug.UserIds = []string{}
-	log.Printf(string(len(users)))
 	for index := 0; index < len(users); index++ {
 		ug.UserIds = append(ug.UserIds, users[index].Id)
 	}

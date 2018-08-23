@@ -1,4 +1,5 @@
-#export GOPATH=/Users/mahpatil/go/src/:~/workspaces/terraform/terraform-provider-keycloak/
+.DEFAULT_GOAL := test
+
 GOPATH=$(shell pwd)/vendor:$(shell pwd)
 
 clean:
