@@ -48,6 +48,17 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			// Valid actions are: "CONFIGURE_TOTP", "UPDATE_PASSWORD", "UPDATE_PROFILE", "VERIFY_EMAIL"
+			"initial_required_actions": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				// Suppress planned changes to required actions if the user has an ID,
+				// meaning the user account has already been created
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
+			},
 		},
 	}
 }
@@ -118,6 +129,7 @@ func resourceDataToUser(d *schema.ResourceData) keycloak.User {
 		u.Id = d.Id()
 	} else {
 		u.Id = u.Username
+		u.RequiredActions = getOptionalStringSet(d, "initial_required_actions")
 	}
 
 	return u
@@ -125,10 +137,22 @@ func resourceDataToUser(d *schema.ResourceData) keycloak.User {
 
 func userToResourceData(u *keycloak.User, d *schema.ResourceData) {
 	d.SetId(u.Id)
-	//d.Set("id", u.Id)
 	d.Set("username", u.Username)
 	d.Set("enabled", u.Enabled)
 	d.Set("firstname", u.FirstName)
 	d.Set("lastname", u.LastName)
 	d.Set("email", u.Email)
+}
+
+// Custom helper function needed to handle optional schema.TypeSet fields because
+// getOptionalStringList() from the terraform helper only supports schema.TypeList
+func getOptionalStringSet(d *schema.ResourceData, key string) []string {
+	stringList := []string{}
+	rawSet, present := d.GetOk(key)
+	if present {
+		for _, stringVal := range (rawSet.(*schema.Set)).List() {
+			stringList = append(stringList, stringVal.(string))
+		}
+	}
+	return stringList
 }
