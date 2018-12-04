@@ -54,6 +54,7 @@ resource "keycloak_user" "josh1" {
   firstname  = "josh"
   lastname   = "cameron"
   email      = "jcameron1@abc.com"
+  initial_required_actions = ["UPDATE_PASSWORD"]
 }
 
 resource "keycloak_user_group_mapping" "group1_map" {
