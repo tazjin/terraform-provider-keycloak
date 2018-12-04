@@ -9,6 +9,7 @@ type User struct {
 	FirstName string `json:"firstName,omitempty"`
 	LastName string `json:"lastName,omitempty"`
 	Email string `json:"email"`
+	RequiredActions []string `json:"requiredActions,omitempty"`
 }
 
 const (
