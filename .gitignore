@@ -1,5 +1,6 @@
 .idea
 release/
+vendor/
 .DS_Store
 bin/
 # Local .terraform directories
