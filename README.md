@@ -24,12 +24,6 @@ files and `terraform providers` to check that it has been loaded correctly.
 
 ## Building from source
 
-To guarantee that the binaries you are building are reproducible, you should consider using
-[Repeatr][] to perform source builds. Repeatr is used for version pinning (see the [formula][]).
-
-Repeatr will check out source code from Github, so in order to build your own forks this way
-you need to push your changes to a branch on Github.
-
 For "vanilla"-builds just do this:
 
 1. Install and configure Go
@@ -100,5 +94,3 @@ terraform import keycloak_group.group2 Jenkins.310f73af-3b70-4e4a-9a6f-a3f4de8c8
 [Keycloak]: http://www.keycloak.org/
 [configure]: https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin
 [releases]: https://github.com/tazjin/terraform-provider-keycloak/releases
-[Repeatr]: http://repeatr.io/
-[formula]: terraform-provider-keycloak.frm
