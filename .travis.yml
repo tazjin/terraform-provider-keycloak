@@ -4,3 +4,4 @@ go:
   - 1.8
 script:
   - (! go fmt ./... 2>&1 | read) || (echo "Code is not properly formatted, remember to use gofmt on all new changes." && exit 1)
+  - go vet ./...
