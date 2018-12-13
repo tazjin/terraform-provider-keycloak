@@ -3,18 +3,18 @@ package keycloak
 import "fmt"
 
 type User struct {
-	Id string `json:"id"`
-	Username string `json:"username"`
-	Enabled bool `json:"enabled"`
-	FirstName string `json:"firstName,omitempty"`
-	LastName string `json:"lastName,omitempty"`
-	Email string `json:"email"`
+	Id              string   `json:"id"`
+	Username        string   `json:"username"`
+	Enabled         bool     `json:"enabled"`
+	FirstName       string   `json:"firstName,omitempty"`
+	LastName        string   `json:"lastName,omitempty"`
+	Email           string   `json:"email"`
 	RequiredActions []string `json:"requiredActions,omitempty"`
 }
 
 const (
-	userUri          = "%s/auth/admin/realms/%s/users/%s"
-	userList          = "%s/auth/admin/realms/%s/users"
+	userUri  = "%s/auth/admin/realms/%s/users/%s"
+	userList = "%s/auth/admin/realms/%s/users"
 )
 
 func (c *KeycloakClient) AddUser(user *User, realm string) (*User, error) {
@@ -30,7 +30,6 @@ func (c *KeycloakClient) AddUser(user *User, realm string) (*User, error) {
 	return &createdUser, err
 }
 
-
 // Attempt to look up user by given user ID
 func (c *KeycloakClient) GetUser(userId string, realm string) (*User, error) {
 	url := fmt.Sprintf(userUri, c.url, realm, userId)
@@ -41,9 +40,8 @@ func (c *KeycloakClient) GetUser(userId string, realm string) (*User, error) {
 	return &user, err
 }
 
-
 // Attempt to update user
-func (c *KeycloakClient) UpdateUser(user *User, realm string) (error) {
+func (c *KeycloakClient) UpdateUser(user *User, realm string) error {
 	url := fmt.Sprintf(userUri, c.url, realm, user.Id)
 	err := c.put(url, *user)
 
@@ -53,7 +51,6 @@ func (c *KeycloakClient) UpdateUser(user *User, realm string) (error) {
 
 	return nil
 }
-
 
 func (c *KeycloakClient) DeleteUser(id string, realm string) error {
 	url := fmt.Sprintf(userUri, c.url, realm, id)
