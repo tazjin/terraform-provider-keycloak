@@ -3,12 +3,13 @@ package keycloak
 import "fmt"
 
 type User struct {
-	Id        string `json:"id"`
-	Username  string `json:"username"`
-	Enabled   bool   `json:"enabled"`
-	FirstName string `json:"firstName,omitempty"`
-	LastName  string `json:"lastName,omitempty"`
-	Email     string `json:"email"`
+	Id              string   `json:"id"`
+	Username        string   `json:"username"`
+	Enabled         bool     `json:"enabled"`
+	FirstName       string   `json:"firstName,omitempty"`
+	LastName        string   `json:"lastName,omitempty"`
+	Email           string   `json:"email"`
+	RequiredActions []string `json:"requiredActions,omitempty"`
 }
 
 const (
