@@ -10,7 +10,7 @@ get: clean
 	@echo "Get..."
 	@GOPATH=$(GOPATH) go get github.com/hashicorp/terraform/plugin
 
-build: clean
+build: get
 	@echo "Build..."
 	@GOPATH=$(GOPATH) go build -o bin/terraform-provider-keycloak -tags netgo
 
