@@ -11,14 +11,14 @@ type Role struct {
 }
 
 const (
-	rolesUri          = "%s/auth/admin/realms/%s/users/%s/role-mappings/realm"
-	availableRolesUri = "%s/auth/admin/realms/%s/users/%s/role-mappings/realm/available"
-	compositeRolesUri = "%s/auth/admin/realms/%s/users/%s/role-mappings/realm/composite"
+	rolesUri          = "%s/auth/admin/realms/%s/users/%s/role-mappings/%s"
+	availableRolesUri = "%s/auth/admin/realms/%s/users/%s/role-mappings/%s/available"
+	compositeRolesUri = "%s/auth/admin/realms/%s/users/%s/role-mappings/%s/composite"
 )
 
 // Attempt to look up available roles for a given user ID
-func (c *KeycloakClient) GetAvailableRolesForUser(userId string, realm string) ([]Role, error) {
-	url := fmt.Sprintf(availableRolesUri, c.url, realm, userId)
+func (c *KeycloakClient) GetAvailableRolesForUser(userId string, realm string, clientId string) ([]Role, error) {
+	url := fmt.Sprintf(availableRolesUri, c.url, realm, userId, getRealmOrClientUri(clientId))
 
 	var roles []Role
 	err := c.get(url, &roles)
@@ -27,8 +27,8 @@ func (c *KeycloakClient) GetAvailableRolesForUser(userId string, realm string) (
 }
 
 // Attempt to look up copmosite (effective) roles for a given user ID
-func (c *KeycloakClient) GetCompositeRolesForUser(userId string, realm string) ([]Role, error) {
-	url := fmt.Sprintf(compositeRolesUri, c.url, realm, userId)
+func (c *KeycloakClient) GetCompositeRolesForUser(userId string, realm string, clientId string) ([]Role, error) {
+	url := fmt.Sprintf(compositeRolesUri, c.url, realm, userId, getRealmOrClientUri(clientId))
 
 	var roles []Role
 	err := c.get(url, &roles)
@@ -55,8 +55,8 @@ func (c *KeycloakClient) FindRoleForUser(roles []Role, roleIdentifier string) (*
 }
 
 // This attempts to add a Keycloak role to a user based after looking up the role ID from the available rolesUri.
-func (c *KeycloakClient) AddRoleToUser(userId string, roleName string, realm string) (*Role, error) {
-	roles, err := c.GetAvailableRolesForUser(userId, realm)
+func (c *KeycloakClient) AddRoleToUser(userId string, roleName string, realm string, clientId string) (*Role, error) {
+	roles, err := c.GetAvailableRolesForUser(userId, realm, clientId)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *KeycloakClient) AddRoleToUser(userId string, roleName string, realm str
 		return nil, err
 	}
 
-	url := fmt.Sprintf(rolesUri, c.url, realm, userId)
+	url := fmt.Sprintf(rolesUri, c.url, realm, userId, getRealmOrClientUri(clientId))
 	body := []Role{*role}
 
 	_, err = c.post(url, &body)
@@ -77,8 +77,8 @@ func (c *KeycloakClient) AddRoleToUser(userId string, roleName string, realm str
 	return role, nil
 }
 
-func (c *KeycloakClient) RemoveRoleFromUser(userId string, role *Role, realm string) error {
-	url := fmt.Sprintf(rolesUri, c.url, realm, userId)
+func (c *KeycloakClient) RemoveRoleFromUser(userId string, role *Role, realm string, clientId string) error {
+	url := fmt.Sprintf(rolesUri, c.url, realm, userId, getRealmOrClientUri(clientId))
 	body := []Role{*role}
 
 	err := c.delete(url, body)
@@ -87,4 +87,12 @@ func (c *KeycloakClient) RemoveRoleFromUser(userId string, role *Role, realm str
 	}
 
 	return nil
+}
+
+func getRealmOrClientUri(clientId string) string {
+	if clientId == "" {
+		return "realm"
+	} else {
+		return "clients/" + clientId
+	}
 }
