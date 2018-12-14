@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"fmt"
 	"keycloak"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -12,6 +14,10 @@ func resourceUserRoleMapping() *schema.Resource {
 		Read:   schema.ReadFunc(resourceUserRoleMappingRead),
 		Create: schema.CreateFunc(resourceUserRoleMappingCreate),
 		Delete: schema.DeleteFunc(resourceUserRoleMappingDelete),
+
+		Importer: &schema.ResourceImporter{
+			State: importUserRoleMappingHelper,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -33,7 +39,7 @@ func resourceUserRoleMapping() *schema.Resource {
 			"client_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default: "",
+				Default:  "",
 				ForceNew: true,
 			},
 			"realm": {
@@ -44,6 +50,40 @@ func resourceUserRoleMapping() *schema.Resource {
 			},
 		},
 	}
+}
+
+func importUserRoleMappingHelper(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	split := strings.Split(d.Id(), ".")
+
+	if len(split) != 4 {
+		return nil, fmt.Errorf("Import ID must be specified as '${realm}.${client_id}.${user-id}.${role-name}'")
+	}
+
+	realm := split[0]
+	clientId := split[1]
+	userId := split[2]
+	roleName := split[3]
+
+	d.Partial(true)
+	d.Set("realm", realm)
+	d.Set("client_id", clientId)
+	d.Set("user_id", userId)
+	d.Set("name", roleName)
+
+	apiClient := m.(*keycloak.KeycloakClient)
+	roles, err := apiClient.GetCompositeRolesForUser(userId, realm, clientId)
+	if err != nil {
+		return nil, err
+	}
+
+	role, err := apiClient.FindRoleForUser(roles, roleName)
+	if err != nil {
+		return nil, err
+	}
+
+	userRoleMappingToResourceData(userId, role, d)
+	d.Partial(false)
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceUserRoleMappingRead(d *schema.ResourceData, m interface{}) error {
