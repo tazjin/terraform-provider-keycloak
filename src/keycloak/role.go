@@ -3,31 +3,30 @@ package keycloak
 import "fmt"
 
 type RoleRepresentation struct {
-	Id             string  `json:"id"`
-	Description    string  `json:"description"`
-	Name           string  `json:"name"`
+	Id          string `json:"id"`
+	Description string `json:"description"`
+	Name        string `json:"name"`
 }
 
 type CompositeRoleReference struct {
-	Id             string  `json:"id"`
+	Id string `json:"id"`
 }
 
 const (
-	clientRolesUri  = "%s/auth/admin/realms/%s/clients/%s/roles"
-	clientRoleUri   = "%s/auth/admin/realms/%s/clients/%s/roles/%s"
+	clientRolesUri           = "%s/auth/admin/realms/%s/clients/%s/roles"
+	clientRoleUri            = "%s/auth/admin/realms/%s/clients/%s/roles/%s"
 	clientRolesCompositesUri = "%s/auth/admin/realms/%s/clients/%s/roles/%s/composites"
 )
 
-func (c *KeycloakClient) GetClientRole(clientId string, realm string, representation *RoleRepresentation) (*RoleRepresentation, error) {
+func (c *KeycloakClient) GetClientRole(clientId string, realm string, roleName string) (*RoleRepresentation, error) {
 	var role RoleRepresentation
-	roleUrl := fmt.Sprintf(clientRoleUri, c.url, realm, clientId, representation.Name)
+	roleUrl := fmt.Sprintf(clientRoleUri, c.url, realm, clientId, roleName)
 	err := c.get(roleUrl, &role)
 	return &role, err
 }
 
 func (c *KeycloakClient) CreateClientRole(clientId string, realm string, representation *RoleRepresentation) (*RoleRepresentation, error) {
 	url := fmt.Sprintf(clientRolesUri, c.url, realm, clientId)
-
 
 	_, err := c.post(url, representation)
 	if err != nil {
@@ -57,12 +56,12 @@ func (c *KeycloakClient) GetCompositeRoles(clientId string, realm string, repres
 	var roles []CompositeRoleReference
 	roleUrl := fmt.Sprintf(clientRolesCompositesUri, c.url, realm, clientId, representation.Name)
 	err := c.get(roleUrl, &roles)
-	
+
 	var compositeRoleIds []string
 	for _, value := range roles {
 		compositeRoleIds = append(compositeRoleIds, value.Id)
 	}
-	
+
 	return compositeRoleIds, err
 }
 

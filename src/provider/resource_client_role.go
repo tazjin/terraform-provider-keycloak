@@ -1,9 +1,11 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"keycloak"
 	"log"
+	"strings"
 )
 
 func resourceClientRole() *schema.Resource {
@@ -16,7 +18,7 @@ func resourceClientRole() *schema.Resource {
 
 		// Keycloak clients are importable by ID, but the realm must also be provided by the user.
 		Importer: &schema.ResourceImporter{
-			State: importClientHelper,
+			State: importClientRoleHelper,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -45,10 +47,39 @@ func resourceClientRole() *schema.Resource {
 	}
 }
 
+func importClientRoleHelper(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	split := strings.Split(d.Id(), ".")
+
+	if len(split) != 3 {
+		return nil, fmt.Errorf("Import ID must be specified as '${realm}.${client_id}.${resource_id}'")
+	}
+
+	realm := split[0]
+	client_id := split[1]
+	role_name := split[2]
+
+	d.Partial(true)
+	d.Set("realm", realm)
+	d.Set("client_id", client_id)
+	d.Set("name", role_name)
+
+	apiClient := m.(*keycloak.KeycloakClient)
+	readRole, err := apiClient.GetClientRole(client_id, realm, role_name)
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("description", readRole.Description)
+	d.SetId(readRole.Id)
+
+	d.Partial(false)
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceDataToRoleRepresentation(d *schema.ResourceData) *keycloak.RoleRepresentation {
-	c := keycloak.RoleRepresentation {
-		Name:                d.Get("name").(string),
-		Description: 		 d.Get("description").(string),
+	c := keycloak.RoleRepresentation{
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
 	}
 
 	if !d.IsNewResource() {
@@ -61,7 +92,7 @@ func resourceDataToRoleRepresentation(d *schema.ResourceData) *keycloak.RoleRepr
 func resourceClientRoleRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*keycloak.KeycloakClient)
 	d.Partial(true)
-	readRole, err := apiClient.GetClientRole(clientId(d), realm(d), resourceDataToRoleRepresentation(d))
+	readRole, err := apiClient.GetClientRole(clientId(d), realm(d), d.Get("name").(string))
 	if err != nil {
 		return err
 	}
