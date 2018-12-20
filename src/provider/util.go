@@ -11,6 +11,32 @@ func realm(d *schema.ResourceData) string {
 	return d.Get("realm").(string)
 }
 
+func clientId(d *schema.ResourceData) string {
+	return d.Get("client_id").(string)
+}
+
+func containsSameElements(a []string, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for _, a_elem := range a {
+		if !contains(b, a_elem) {
+			return false
+		}
+	}
+	return true
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 func getOptionalBool(d *schema.ResourceData, key string) *bool {
 	if v, present := d.GetOk(key); present {
 		b := v.(bool)

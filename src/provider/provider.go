@@ -13,6 +13,7 @@ func Provider() terraform.ResourceProvider {
 		ConfigureFunc: schema.ConfigureFunc(keycloakProviderSetup),
 		ResourcesMap: map[string]*schema.Resource{
 			"keycloak_client":             resourceClient(),
+			"keycloak_client_role":        resourceClientRole(),
 			"keycloak_user_role_mapping":  resourceUserRoleMapping(),
 			"keycloak_realm":              resourceRealm(),
 			"keycloak_user":               resourceUser(),
