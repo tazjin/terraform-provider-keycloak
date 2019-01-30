@@ -20,7 +20,7 @@ Grab a binary release for your operating system from the [releases][] page and d
 Run `terraform init` to initialise the new provider in the folder containing your configuration
 files and `terraform providers` to check that it has been loaded correctly.
 
-**Note**: The targeted version of Terraform is currently **v0.10.0**.
+**Note**: The targeted version of Terraform is currently **v0.11.11**.
 
 ## Building from source
 
