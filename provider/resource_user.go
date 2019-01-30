@@ -58,6 +58,11 @@ func resourceUser() *schema.Resource {
 					return d.Id() != ""
 				},
 			},
+			"attributes": {
+				Type:     schema.TypeMap,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
 		},
 	}
 }
@@ -117,11 +122,12 @@ func resourceUserDelete(d *schema.ResourceData, m interface{}) error {
 
 func resourceDataToUser(d *schema.ResourceData) keycloak.User {
 	u := keycloak.User{
-		Username:  d.Get("username").(string),
-		Enabled:   d.Get("enabled").(bool),
-		FirstName: d.Get("firstname").(string),
-		LastName:  d.Get("lastname").(string),
-		Email:     d.Get("email").(string),
+		Username:   d.Get("username").(string),
+		Enabled:    d.Get("enabled").(bool),
+		FirstName:  d.Get("firstname").(string),
+		LastName:   d.Get("lastname").(string),
+		Email:      d.Get("email").(string),
+		Attributes: toMapOfStringSlices(getOptionalStringMap(d, "attributes")),
 	}
 
 	if !d.IsNewResource() {
@@ -141,6 +147,7 @@ func userToResourceData(u *keycloak.User, d *schema.ResourceData) {
 	d.Set("firstname", u.FirstName)
 	d.Set("lastname", u.LastName)
 	d.Set("email", u.Email)
+	d.Set("attributes", fromMapOfStringSlices(u.Attributes))
 }
 
 // Custom helper function needed to handle optional schema.TypeSet fields because
@@ -154,4 +161,30 @@ func getOptionalStringSet(d *schema.ResourceData, key string) []string {
 		}
 	}
 	return stringList
+}
+
+// These functions are needed primarily because user attributes are given to
+// and read from Keycloak as a map with string keys and []string as values,
+// but we model those attributes as a map with string keys and single string values
+
+func toMapOfStringSlices(inMap map[string]string) map[string][]string {
+	result := make(map[string][]string)
+
+	// goes through each entry in the configured resource and creates and
+	// entry in the new map, where the value is a slice of strings with only one entry
+	for key, val := range inMap {
+		result[key] = []string{val}
+	}
+
+	return result
+}
+
+func fromMapOfStringSlices(inMap map[string][]string) map[string]string {
+	result := make(map[string]string)
+
+	for key, arrVal := range inMap {
+		result[key] = arrVal[0]
+	}
+
+	return result
 }
