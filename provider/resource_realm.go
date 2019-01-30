@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"keycloak"
+	"github.com/tazjin/terraform-provider-keycloak/keycloak"
 )
 
 func resourceRealm() *schema.Resource {

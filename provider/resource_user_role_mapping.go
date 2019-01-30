@@ -2,10 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"keycloak"
-	"strings"
-
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/tazjin/terraform-provider-keycloak/keycloak"
+	"strings"
 )
 
 func resourceUserRoleMapping() *schema.Resource {

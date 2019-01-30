@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/plugin"
-	"provider"
+	"github.com/tazjin/terraform-provider-keycloak/provider"
 )
 
 func main() {

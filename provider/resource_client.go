@@ -5,7 +5,7 @@ package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"keycloak"
+	"github.com/tazjin/terraform-provider-keycloak/keycloak"
 )
 
 func resourceClient() *schema.Resource {

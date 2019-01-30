@@ -3,7 +3,7 @@ package provider
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"keycloak"
+	"github.com/tazjin/terraform-provider-keycloak/keycloak"
 	"log"
 	"strings"
 )
