@@ -10,6 +10,12 @@ type User struct {
 	LastName        string   `json:"lastName,omitempty"`
 	Email           string   `json:"email"`
 	RequiredActions []string `json:"requiredActions,omitempty"`
+
+	// Keycloak models these attributes as a map where the value is a string slice,
+	// although the can only be one string value per map item. The REST API docs
+	// aren't very clear about this either, this knowledge is only based on looking
+	// at the actual API responses.
+	Attributes map[string][]string `json:"attributes,omitempty"`
 }
 
 const (

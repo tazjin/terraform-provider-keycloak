@@ -49,6 +49,10 @@ resource "keycloak_user" "josh" {
   firstname = "josh"
   lastname  = "cameron"
   email     = "jcameron@abc.com"
+
+  attributes = {
+    customMetaData = "josh rocks"
+  }
 }
 
 resource "keycloak_user" "josh1" {
