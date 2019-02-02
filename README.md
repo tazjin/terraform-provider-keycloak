@@ -105,7 +105,9 @@ $ git push origin --tags
 ```
 
 The above will make Travis CI build the project as usual, then upload the resulting binaries
-up to github.com, making them visible on our [releases][] page.
+up to github.com, making them visible on our [releases][] page. Maintainer publishing the new
+release has to manually fill in the release body of that given version, with details about
+what changes got introduced.
 
 [Terraform provider]: https://www.terraform.io/docs/plugins/provider.html
 [Keycloak]: http://www.keycloak.org/
