@@ -22,13 +22,6 @@ files and `terraform providers` to check that it has been loaded correctly.
 
 **Note**: The targeted version of Terraform is currently **v0.11.11**.
 
-## Building from source
-
-For "vanilla"-builds just do this:
-
-1. Install and configure Go
-2. `make install`
-
 ## Setup instructions
 
 The Keycloak instance to manage needs to be configured with a client that has
@@ -89,6 +82,32 @@ To import a user or group use the following command:
 terraform import <keycloak_resource>.<resource_name> <realm_name>.<resource_id>
 terraform import keycloak_group.group2 Jenkins.310f73af-3b70-4e4a-9a6f-a3f4de8c8f
 ```
+
+## Building from source
+
+For "vanilla"-builds do this:
+
+1. Install and configure Go v1.11.x or later
+2. `$ make install`
+
+The last step will build the provider for your machine and copy the binary into `~/.terraform.d/plugins` ready to be used.
+
+## Publish new releases
+
+All maintainers have the ability to publish new releases of this provider
+by pushing a new git tag to the repository after new changes has been merged.
+
+As an example for publishing a new releases named `v1.0.1`:
+
+```
+$ git tag v1.0.1
+$ git push origin --tags
+```
+
+The above will make Travis CI build the project as usual, then upload the resulting binaries
+up to github.com, making them visible on our [releases][] page. Maintainer publishing the new
+release has to manually fill in the release body of that given version, with details about
+what changes got introduced.
 
 [Terraform provider]: https://www.terraform.io/docs/plugins/provider.html
 [Keycloak]: http://www.keycloak.org/

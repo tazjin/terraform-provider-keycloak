@@ -4,6 +4,29 @@ go:
   - 1.11
 env:
   - GO111MODULE=on
+
+before_install:
+  # gox simplifies building for multiple architectures
+  - go get github.com/mitchellh/gox
+
 script:
   - go vet ./...
   - (! go fmt ./... 2>&1 | read) || (echo "Code is not properly formatted, remember to use gofmt on all new changes." && exit 1)
+  - gox -os="linux darwin freebsd windows" -arch="amd64" -output="releases/terraform-provider-keycloak-${TRAVIS_TAG}-{{.OS}}-{{.Arch}}"
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  # Explicitly set release title on GitHub
+  name: $TRAVIS_TAG
+  api_key:
+    # This is an encrypted personal OAuth GitHub token, encrypted with the Travis CI CLI. If the OAuth token gets revoked
+    # for whatever reason, a new personal OAuth token has to be created by a maintainer, with the public_repo or repo scope,
+    # encrypted via the `travis encrypt` command and the value below updated
+    secure: "WxWlE+Vf6XeSsx+uwXNk+4eblpin74h9yLtW4z7siyjhaO3UqJQSRyAcBj/jC27+82FN1EzoU0muNbgaZtVYaWDQaaNHzFuhcYbzimxb2TzOaF75vUEebHuUC1EQ5yOn1anSdQN8vXqvVM36YyO3VwMJh3gUHOnv3FIpFBoG+y97nQ7JabvJx/ZrxurKgbYkLA5JlldlKLb1RqhNxBoirmORw3gH5M+mb+Y/Pu1pVUQtCA2bEtkUDZx/dQx7h+bUPk2d5AhPRqGBXMYT9h/gGx9clow9Twv8jRBoL4pxesn0XmCySmdFp8nItbtCRWE2bZCnwxOMp5aVBtODWFghvbJVhalUU4kAGAujawqm9sp81fvTJZvGuPKVrRc1TUSYIoRLxUCjKV7rK93qbt6CMOLLOvv8GQ3a0DPRkDqAbnSo4r4GL+9SSvFgEkCPLstGWIp/P9K9LplEbXElrxdM7UNpyZMa2gVpeZ7Dr+lymqpO0bxLI2D3JggPMeSS0coKUbgibZHnNcRCjRTKdHxLZvOsqgqQ/881cmRTMQdrKuEC9PlOCJ3ZxhkoeaYqcsPw/aRyTnV+vT+Mrw51aQ07wH47hkT9By2hEeNnw79QCOq93jNBbwWosKeithmtN4S7J5ClUNJ2Cq7DQyZ4zNAGTyyQQGQZvznELAbQfX3QiKM="
+  file_glob: true
+  file: releases/*
+  on:
+    repo: tazjin/terraform-provider-keycloak
+    # Only build binaries for tagged commits
+    tags: true
