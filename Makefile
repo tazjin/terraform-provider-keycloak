@@ -4,11 +4,7 @@ clean:
 	@echo "Clean ./bin"
 	rm -rf bin pkg *.out
 
-get: clean
-	@echo "Get..."
-	go get github.com/hashicorp/terraform/plugin
-
-build: get
+build:
 	@echo "Build..."
 	go build -o bin/terraform-provider-keycloak -tags netgo
 
